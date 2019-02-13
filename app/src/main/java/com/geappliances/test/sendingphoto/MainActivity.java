@@ -2,6 +2,9 @@ package com.geappliances.test.sendingphoto;
 
 import android.Manifest;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Point;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -9,6 +12,7 @@ import android.provider.MediaStore;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Display;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -18,8 +22,10 @@ import com.gun0912.tedpermission.PermissionListener;
 import com.gun0912.tedpermission.TedPermission;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetAddress;
@@ -35,6 +41,7 @@ public class MainActivity extends AppCompatActivity {
 
     private Button btnSelect;
     private Button btnCamera;
+    private Button btnResizing;
     private ImageView imageView;
 
     private static final int REQUEST_SELECT_PHOTO = 1;
@@ -78,9 +85,83 @@ public class MainActivity extends AppCompatActivity {
         });
 
         imageView = (ImageView) findViewById(R.id.image);
+
+        btnResizing = (Button) findViewById(R.id.btn_resizingImage);
+        btnResizing.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d(TAG, "사진Resizing");
+                makeBitmap(mCurrentPhotoPath);
+            }
+        });
+
+    }
+
+    private Bitmap makeBitmap(String path) {
+
+        try {
+            final int IMAGE_MAX_SIZE = 1200000; // 1.2MP
+            //resource = getResources();
+
+            // Decode image size
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inJustDecodeBounds = true;
+            BitmapFactory.decodeFile(path, options);
+
+            int scale = 1;
+            while ((options.outWidth * options.outHeight) * (1 / Math.pow(scale, 2)) >
+                    IMAGE_MAX_SIZE) {
+                scale++;
+            }
+            Log.d("TAG", "scale = " + scale + ", orig-width: " + options.outWidth + ", orig-height: " + options.outHeight);
+
+            Bitmap pic = null;
+            if (scale > 1) {
+                scale--;
+                // scale to max possible inSampleSize that still yields an image
+                // larger than target
+                options = new BitmapFactory.Options();
+                options.inSampleSize = scale;
+                pic = BitmapFactory.decodeFile(path, options);
+
+                // resize to desired dimensions
+
+                Display display = getWindowManager().getDefaultDisplay();
+                Point size = new Point();
+                display.getSize(size);
+                int width = size.y;
+                int height = size.x;
+
+                //int height = imageView.getHeight();
+                //int width = imageView.getWidth();
+                Log.d("TAG", "1th scale operation dimenions - width: " + width + ", height: " + height);
+
+                double y = Math.sqrt(IMAGE_MAX_SIZE
+                        / (((double) width) / height));
+                double x = (y / height) * width;
+
+                Bitmap scaledBitmap = Bitmap.createScaledBitmap(pic, (int) x, (int) y, true);
+                pic.recycle();
+                pic = scaledBitmap;
+
+                System.gc();
+            } else {
+                pic = BitmapFactory.decodeFile(path);
+            }
+
+            Log.d("TAG", "bitmap size - width: " +pic.getWidth() + ", height: " + pic.getHeight());
+            imageView.setImageBitmap( pic );
+            return pic;
+
+        } catch (Exception e) {
+            Log.e("TAG", e.getMessage(),e);
+            return null;
+        }
+
     }
 
     public void selectAlbum() {
+
         Log.d(TAG, "사진선택");
         Intent intent = new Intent(Intent.ACTION_PICK);
         intent.setType(MediaStore.Images.Media.CONTENT_TYPE);
