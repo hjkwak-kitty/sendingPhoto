@@ -91,16 +91,16 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Log.d(TAG, "사진Resizing");
-                makeBitmap(mCurrentPhotoPath);
+                makeBitmap(mCurrentPhotoPath, 1200000);// 1.2MP
             }
         });
 
     }
 
-    private Bitmap makeBitmap(String path) {
+    private Bitmap makeBitmap(String path, int IMAGE_MAX_SIZE) {
 
         try {
-            final int IMAGE_MAX_SIZE = 1200000; // 1.2MP
+//            final int IMAGE_MAX_SIZE = 1200000;
             //resource = getResources();
 
             // Decode image size
