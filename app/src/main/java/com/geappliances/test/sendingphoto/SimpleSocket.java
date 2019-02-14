@@ -82,6 +82,8 @@ public class SimpleSocket extends Thread {
             buffSend = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
             out = new PrintWriter(buffSend, true);
             makeMessage(MessageType.SIMSOCK_CONNECTED, "connected");
+            Constants.IP = addr;
+            Constants.PORT = port;
 
 
         } catch (IOException e) {
@@ -107,12 +109,14 @@ public class SimpleSocket extends Thread {
             try {
 //                makeMessage(MessageType.SIMSOCK_DATA, "test" + socket.isConnected());
                 aLine = buffRecv.readLine();
-                if (!aLine.isEmpty()) {
-                    if(aLine.contains("image")) {
+                if (aLine == null) {
+                    disconnected();
+                } else {
+                    if (aLine.contains("image")) {
                         makeMessage(MessageType.SIMSOCK_REQIMAGE, aLine + socket.isConnected());
-                    } else if(aLine.contains("Brand")) {
+                    } else if (aLine.contains("Brand")) {
                         makeMessage(MessageType.SIMSOCK_DATA, aLine + socket.isConnected());
-                        disconnected();
+//                        disconnected();
                     } else {
                         makeMessage(MessageType.SIMSOCK_DATA, aLine + socket.isConnected());
                     }
@@ -146,13 +150,12 @@ public class SimpleSocket extends Thread {
             buffRecv.close();
             buffSend.close();
 
-            fis.close();
             dos.close();
             socket.close();
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
-        } catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         } finally {
 
@@ -178,6 +181,7 @@ public class SimpleSocket extends Thread {
                 dos.write(buffer);
                 dos.flush();
             }
+            fis.close();
 
             Log.d("소켓", "데이터 보냄 완료" + myFile.exists() + socket.isConnected());
 
