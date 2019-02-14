@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">SendingPhoto</string>
+    <string name="txt_host">HOST:</string>
+    <string name="txt_port">PORT:</string>
+    <string name="btn_select_photo">SELECT PHOTO</string>
+    <string name="btn_from_camera">CAMERA</string>
 </resources>

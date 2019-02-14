@@ -5,26 +5,25 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
+import android.os.StrictMode;
 import android.provider.MediaStore;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.gun0912.tedpermission.PermissionListener;
 import com.gun0912.tedpermission.TedPermission;
 
-import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.net.InetAddress;
-import java.net.Socket;
-import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -36,17 +35,24 @@ public class MainActivity extends AppCompatActivity {
     private Button btnSelect;
     private Button btnCamera;
     private ImageView imageView;
+    private EditText editHost;
+    private EditText editPort;
 
     private static final int REQUEST_SELECT_PHOTO = 1;
     private static final int REQUEST_TAKE_PHOTO = 0;
 
     private Uri imgUri, photoURI, albumURI;
-    private String mCurrentPhotoPath;
+    private String currentPhotoPath;
+
+    SimpleSocket ssocket;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+//        Make can do socket transport in main thread
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy);
 
 //        Permission Check
         TedPermission.with(this)
@@ -55,6 +61,12 @@ public class MainActivity extends AppCompatActivity {
                 .setPermissions(Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 .check();
 
+
+        editHost = (EditText) findViewById(R.id.edit_host);
+        editHost.setHint(Constants.IP);
+
+        editPort = (EditText) findViewById(R.id.edit_port);
+        editPort.setHint(String.valueOf(Constants.PORT));
 
 //        Button Set
         btnSelect = (Button) findViewById(R.id.btn_select);
@@ -78,6 +90,16 @@ public class MainActivity extends AppCompatActivity {
         });
 
         imageView = (ImageView) findViewById(R.id.image);
+        imageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (ssocket.isConnected()) {
+                    File imgfile = new File(currentPhotoPath);
+                    ssocket.sendString("size " + imgfile.length() + " .jpg");
+
+                }
+            }
+        });
     }
 
     public void selectAlbum() {
@@ -98,27 +120,19 @@ public class MainActivity extends AppCompatActivity {
             Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
             if (intent.resolveActivity(getPackageManager()) != null) {
-
                 File photoFile = null;
-
                 try {
 
                     photoFile = createImageFile();
 
                 } catch (IOException e) {
-
                     e.printStackTrace();
-
                 }
 
                 if (photoFile != null) {
-
                     Uri providerURI = FileProvider.getUriForFile(this, "com.example.android.fileprovider", photoFile);
-
                     imgUri = providerURI;
-
                     intent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, providerURI);
-
                     startActivityForResult(intent, REQUEST_TAKE_PHOTO);
 
                 }
@@ -137,7 +151,7 @@ public class MainActivity extends AppCompatActivity {
     private File createImageFile() throws IOException {
         // Create an image file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String imageFileName = "JPEG_" + timeStamp + "_";
+        String imageFileName = "JPEG" + timeStamp + "_";
         File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
         File image = File.createTempFile(
                 imageFileName,  /* prefix */
@@ -146,7 +160,7 @@ public class MainActivity extends AppCompatActivity {
         );
 
         // Save a file: path for use with ACTION_VIEW intents
-        mCurrentPhotoPath = image.getAbsolutePath();
+        currentPhotoPath = image.getAbsolutePath();
         return image;
     }
 
@@ -158,9 +172,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         if (resultCode != RESULT_OK) {
-
             return;
-
         }
 
         switch (requestCode) {
@@ -179,8 +191,7 @@ public class MainActivity extends AppCompatActivity {
                         photoURI = data.getData();
                         albumURI = Uri.fromFile(albumFile);
                         imageView.setImageURI(photoURI);
-
-                        sendPhoto(photoURI);
+                        sendPhoto(currentPhotoPath);
                         //cropImage();
 
                     } catch (Exception e) {
@@ -206,7 +217,7 @@ public class MainActivity extends AppCompatActivity {
                     Log.v("알림", "FROM_CAMERA 처리");
 
                     imageView.setImageURI(imgUri);
-                    sendPhoto(imgUri);
+                    sendPhoto(currentPhotoPath);
 
                 } catch (Exception e) {
 
@@ -223,12 +234,60 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-
-    private void sendPhoto(Uri imgUri){
-
+    private void sendPhoto(String imgUri) {
+        Log.v("메인", editPort.getText().toString());
+        String host = Constants.IP;
+        int port = Constants.PORT;
+        if (!editPort.getText().toString().isEmpty()) {
+            port = Integer.parseInt(String.valueOf(editPort.getText()));
+        }
+        if (!editHost.getText().toString().isEmpty()) {
+            host = String.valueOf(editHost.getText());
+        }
+        ssocket = new SimpleSocket(host, port, mHandler, imgUri);
+        ssocket.start();
 
 
     }
+
+    Handler mHandler = new Handler(Looper.getMainLooper()) {
+        @Override
+        public void handleMessage(Message inputMessage) {
+            switch (inputMessage.what) {
+                case Constants.SIMSOCK_CONNECTED:
+                    String msg = (String) inputMessage.obj;
+                    Toast.makeText(getApplicationContext(),"Socket connected",Toast.LENGTH_SHORT).show();
+                    Log.d("OUT", msg);
+                    // do something with UI
+                    break;
+                case Constants.SIMSOCK_DISCONNECTED:
+                    Log.d("OUT", inputMessage.obj.toString());
+//                    Toast.makeText(getApplicationContext(),"Socket disconnected",Toast.LENGTH_SHORT).show();
+                    // do something with UI
+                    break;
+                case Constants.SIMSOCK_REQIMAGE:
+                    Log.d("OUT", inputMessage.obj.toString());
+//                    if(ssocket.isConnected()){
+                        ssocket.sendFile(currentPhotoPath);
+//                    } else {
+//                        //오류
+//                    }
+                    // do something with UI
+                    break;
+                    case Constants.SIMSOCK_DATA:
+                        Toast.makeText(getApplicationContext(),inputMessage.obj.toString(),Toast.LENGTH_SHORT).show();
+                        Log.d("OUT", inputMessage.obj.toString());
+                        break;
+                case Constants.SIMSOCK_ERROR:
+                    Log.d("OUT", "error");
+
+                    //오류
+                        break;
+
+
+            }
+        }
+    };
 
     PermissionListener permissionlistener = new PermissionListener() {
         @Override
