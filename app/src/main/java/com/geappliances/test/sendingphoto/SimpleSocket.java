@@ -108,9 +108,17 @@ public class SimpleSocket extends Thread {
         while (!Thread.interrupted()) {
             try {
 //                makeMessage(MessageType.SIMSOCK_DATA, "test" + socket.isConnected());
+                if(socket.isInputShutdown() || socket.isOutputShutdown()){
+                    disconnected();
+                    makeMessage(MessageType.SIMSOCK_DISCONNECTED, "disconnected");
+                    return;
+
+                }
                 aLine = buffRecv.readLine();
                 if (aLine == null) {
                     disconnected();
+                    makeMessage(MessageType.SIMSOCK_DISCONNECTED, "disconnected");
+                    return;
                 } else {
                     if (aLine.contains("image")) {
                         makeMessage(MessageType.SIMSOCK_REQIMAGE, aLine);
@@ -124,7 +132,7 @@ public class SimpleSocket extends Thread {
 
                 }
             } catch (IOException e) {
-                makeMessage(MessageType.SIMSOCK_ERROR, aLine);
+                makeMessage(MessageType.SIMSOCK_ERROR, "error " + e.getMessage());
 //                disconnected();
                 // TODO Auto-generated catch block
                 e.printStackTrace();

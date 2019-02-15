@@ -59,7 +59,18 @@ while True:
 
         conn.sendall(network_data.encode())
 
-        conn.close()
+        print('waiting result...')
+
+        while (True):
+            recv_data = conn.recv(1024)
+            txt = recv_data.decode()
+            if txt.startswith('ok'):
+                print('send success, socket close')
+                conn.close()
+                break
+            else:
+                print('resend result')
+                conn.sendall(network_data.encode())
 
     else:
         print('wrong data received, format is size xxx .ext - example: size: 500000 .jpg\n')

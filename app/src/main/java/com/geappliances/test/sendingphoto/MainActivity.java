@@ -102,6 +102,9 @@ public class MainActivity extends AppCompatActivity {
                     File imgfile = new File(currentPhotoPath);
                     ssocket.sendString("size " + imgfile.length() + " .jpg");
 
+                } else {
+                    Toast.makeText(getApplicationContext(),"Socket disconnected",Toast.LENGTH_SHORT).show();
+
                 }
             }
         });
@@ -353,8 +356,12 @@ public class MainActivity extends AppCompatActivity {
                     // do something with UI
                     break;
                     case Constants.SIMSOCK_DATA:
+                        if(ssocket.isConnected()) {
+                            ssocket.sendString("ok");
+                        }
                         Toast.makeText(getApplicationContext(),inputMessage.obj.toString(),Toast.LENGTH_SHORT).show();
                         Log.d("OUT", inputMessage.obj.toString());
+
                         break;
                 case Constants.SIMSOCK_ERROR:
                     Toast.makeText(getApplicationContext(),"Error: "+ inputMessage.obj.toString(),Toast.LENGTH_SHORT).show();
