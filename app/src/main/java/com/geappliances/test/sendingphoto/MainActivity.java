@@ -272,7 +272,7 @@ public class MainActivity extends AppCompatActivity {
                         photoURI = data.getData();
                         albumURI = Uri.fromFile(albumFile);
                         imageView.setImageURI(photoURI);
-                        sendPhoto(currentPhotoPath);
+                        sendPhoto(photoURI);
                         //cropImage();
 
                     } catch (Exception e) {
@@ -298,7 +298,7 @@ public class MainActivity extends AppCompatActivity {
                     Log.v("알림", "FROM_CAMERA 처리");
 
                     imageView.setImageURI(imgUri);
-                    sendPhoto(currentPhotoPath);
+                    sendPhoto(imgUri);
 
                 } catch (Exception e) {
 
@@ -315,7 +315,13 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void sendPhoto(String imgUri) {
+    private void sendPhoto(Uri imgUri) {
+   // 이미지 편집
+        
+
+    }
+
+    private void connectServer(String imgUri){
         Log.v("메인", editPort.getText().toString());
         String host = Constants.IP;
         int port = Constants.PORT;
@@ -327,7 +333,6 @@ public class MainActivity extends AppCompatActivity {
         }
         ssocket = new SimpleSocket(host, port, mHandler, imgUri);
         ssocket.start();
-
 
     }
 
