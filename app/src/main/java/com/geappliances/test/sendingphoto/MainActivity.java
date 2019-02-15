@@ -27,11 +27,6 @@ import com.gun0912.tedpermission.PermissionListener;
 import com.gun0912.tedpermission.TedPermission;
 
 import java.io.File;
-import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -271,7 +266,6 @@ public class MainActivity extends AppCompatActivity {
                         File albumFile = null;
 
                         albumFile = createImageFile();
-
                         photoURI = data.getData();
                         albumURI = Uri.fromFile(albumFile);
                         imageView.setImageURI(photoURI);
@@ -363,6 +357,7 @@ public class MainActivity extends AppCompatActivity {
                         Log.d("OUT", inputMessage.obj.toString());
                         break;
                 case Constants.SIMSOCK_ERROR:
+                    Toast.makeText(getApplicationContext(),"Error: "+ inputMessage.obj.toString(),Toast.LENGTH_SHORT).show();
                     Log.d("OUT", "error");
 
                     //오류

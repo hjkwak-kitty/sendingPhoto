@@ -113,23 +113,16 @@ public class SimpleSocket extends Thread {
                     disconnected();
                 } else {
                     if (aLine.contains("image")) {
-                        makeMessage(MessageType.SIMSOCK_REQIMAGE, aLine + socket.isConnected());
+                        makeMessage(MessageType.SIMSOCK_REQIMAGE, aLine);
                     } else if (aLine.contains("Brand")) {
-                        makeMessage(MessageType.SIMSOCK_DATA, aLine + socket.isConnected());
-//                        disconnected();
+                        makeMessage(MessageType.SIMSOCK_DATA, aLine);
                     } else {
-                        makeMessage(MessageType.SIMSOCK_DATA, aLine + socket.isConnected());
+                        Log.d("SimpleSocket", "socket_thread loop started");
+                        makeMessage(MessageType.SIMSOCK_DATA, aLine);
                     }
                     aLine = null;
 
                 }
-//                if (aLine!=null&& aLine.contains("request image")) {
-//                    makeMessage(MessageType.SIMSOCK_REQIMAGE, imgUrl);
-//                } else if (aLine.contains("Brand")) {
-//                    makeMessage(MessageType.SIMSOCK_DATA, aLine);
-//                    disconnected();
-//                    break;
-//                }
             } catch (IOException e) {
                 makeMessage(MessageType.SIMSOCK_ERROR, aLine);
 //                disconnected();
