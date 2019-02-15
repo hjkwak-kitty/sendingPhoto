@@ -27,7 +27,10 @@ import com.gun0912.tedpermission.PermissionListener;
 import com.gun0912.tedpermission.TedPermission;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -103,7 +106,7 @@ public class MainActivity extends AppCompatActivity {
                     ssocket.sendString("size " + imgfile.length() + " .jpg");
 
                 } else {
-                    Toast.makeText(getApplicationContext(),"Socket disconnected",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), "Socket disconnected", Toast.LENGTH_SHORT).show();
 
                 }
             }
@@ -172,12 +175,12 @@ public class MainActivity extends AppCompatActivity {
                 pic = BitmapFactory.decodeFile(path);
             }
 
-            Log.d("TAG", "bitmap size - width: " +pic.getWidth() + ", height: " + pic.getHeight());
-            imageView.setImageBitmap( pic );
+            Log.d("TAG", "bitmap size - width: " + pic.getWidth() + ", height: " + pic.getHeight());
+            imageView.setImageBitmap(pic);
             return pic;
 
         } catch (Exception e) {
-            Log.e("TAG", e.getMessage(),e);
+            Log.e("TAG", e.getMessage(), e);
             return null;
         }
 
@@ -267,12 +270,14 @@ public class MainActivity extends AppCompatActivity {
                     try {
 
                         File albumFile = null;
-
-                        albumFile = createImageFile();
-                        photoURI = data.getData();
-                        albumURI = Uri.fromFile(albumFile);
-                        imageView.setImageURI(photoURI);
-                        sendPhoto(photoURI);
+                        albumURI = data.getData();
+                        InputStream inStream = getContentResolver().openInputStream(albumURI);
+                        albumFile = writeFile(inStream);
+                        Uri providerURI = FileProvider.getUriForFile(this, "com.example.android.fileprovider", albumFile);
+                        imgUri = providerURI;
+                        imageView.setImageURI(imgUri);
+                        sendPhoto(albumURI);
+                        Log.d("album",albumFile.getAbsolutePath());
                         //cropImage();
 
                     } catch (Exception e) {
@@ -316,12 +321,40 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void sendPhoto(Uri imgUri) {
-   // 이미지 편집
-        
+        // 이미지 편집
+
 
     }
 
-    private void connectServer(String imgUri){
+    private File writeFile(InputStream in) throws IOException {
+        File file = null;
+        file = createImageFile();
+
+        OutputStream out = null;
+        try {
+            out = new FileOutputStream(file);
+            byte[] buf = new byte[1024];
+            int len;
+            while ((len = in.read(buf)) > 0) {
+                out.write(buf, 0, len);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (out != null) {
+                    out.close();
+                }
+                in.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return file;
+    }
+
+    private void connectServer(String imgUri) {
         Log.v("메인", editPort.getText().toString());
         String host = Constants.IP;
         int port = Constants.PORT;
@@ -342,7 +375,7 @@ public class MainActivity extends AppCompatActivity {
             switch (inputMessage.what) {
                 case Constants.SIMSOCK_CONNECTED:
                     String msg = (String) inputMessage.obj;
-                    Toast.makeText(getApplicationContext(),"Socket connected",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), "Socket connected", Toast.LENGTH_SHORT).show();
                     Log.d("OUT", msg);
                     // do something with UI
                     break;
@@ -354,26 +387,26 @@ public class MainActivity extends AppCompatActivity {
                 case Constants.SIMSOCK_REQIMAGE:
                     Log.d("OUT", inputMessage.obj.toString());
 //                    if(ssocket.isConnected()){
-                        ssocket.sendFile(currentPhotoPath);
+                    ssocket.sendFile(currentPhotoPath);
 //                    } else {
 //                        //오류
 //                    }
                     // do something with UI
                     break;
-                    case Constants.SIMSOCK_DATA:
-                        if(ssocket.isConnected()) {
-                            ssocket.sendString("ok");
-                        }
-                        Toast.makeText(getApplicationContext(),inputMessage.obj.toString(),Toast.LENGTH_SHORT).show();
-                        Log.d("OUT", inputMessage.obj.toString());
+                case Constants.SIMSOCK_DATA:
+                    if (ssocket.isConnected()) {
+                        ssocket.sendString("ok");
+                    }
+                    Toast.makeText(getApplicationContext(), inputMessage.obj.toString(), Toast.LENGTH_SHORT).show();
+                    Log.d("OUT", inputMessage.obj.toString());
 
-                        break;
+                    break;
                 case Constants.SIMSOCK_ERROR:
-                    Toast.makeText(getApplicationContext(),"Error: "+ inputMessage.obj.toString(),Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), "Error: " + inputMessage.obj.toString(), Toast.LENGTH_SHORT).show();
                     Log.d("OUT", "error");
 
                     //오류
-                        break;
+                    break;
 
 
             }
