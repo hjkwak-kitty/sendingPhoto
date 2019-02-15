@@ -114,74 +114,13 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Log.d(TAG, "사진Resizing");
-                makeBitmap(currentPhotoPath, 1200000);// 1.2MP
+//                makeBitmap(currentPhotoPath);
             }
         });
 
     }
 
-    private Bitmap makeBitmap(String path, int IMAGE_MAX_SIZE) {
 
-        try {
-//            final int IMAGE_MAX_SIZE = 1200000;
-            //resource = getResources();
-
-            // Decode image size
-            BitmapFactory.Options options = new BitmapFactory.Options();
-            options.inJustDecodeBounds = true;
-            BitmapFactory.decodeFile(path, options);
-
-            int scale = 1;
-            while ((options.outWidth * options.outHeight) * (1 / Math.pow(scale, 2)) >
-                    IMAGE_MAX_SIZE) {
-                scale++;
-            }
-            Log.d("TAG", "scale = " + scale + ", orig-width: " + options.outWidth + ", orig-height: " + options.outHeight);
-
-            Bitmap pic = null;
-            if (scale > 1) {
-                scale--;
-                // scale to max possible inSampleSize that still yields an image
-                // larger than target
-                options = new BitmapFactory.Options();
-                options.inSampleSize = scale;
-                pic = BitmapFactory.decodeFile(path, options);
-
-                // resize to desired dimensions
-
-                Display display = getWindowManager().getDefaultDisplay();
-                Point size = new Point();
-                display.getSize(size);
-                int width = size.y;
-                int height = size.x;
-
-                //int height = imageView.getHeight();
-                //int width = imageView.getWidth();
-                Log.d("TAG", "1th scale operation dimenions - width: " + width + ", height: " + height);
-
-                double y = Math.sqrt(IMAGE_MAX_SIZE
-                        / (((double) width) / height));
-                double x = (y / height) * width;
-
-                Bitmap scaledBitmap = Bitmap.createScaledBitmap(pic, (int) x, (int) y, true);
-                pic.recycle();
-                pic = scaledBitmap;
-
-                System.gc();
-            } else {
-                pic = BitmapFactory.decodeFile(path);
-            }
-
-            Log.d("TAG", "bitmap size - width: " +pic.getWidth() + ", height: " + pic.getHeight());
-            imageView.setImageBitmap( pic );
-            return pic;
-
-        } catch (Exception e) {
-            Log.e("TAG", e.getMessage(),e);
-            return null;
-        }
-
-    }
 
     public void selectAlbum() {
 
@@ -317,8 +256,9 @@ public class MainActivity extends AppCompatActivity {
 
     private void sendPhoto(Uri imgUri) {
    // 이미지 편집
-        
-
+        Intent intent = new Intent(getApplicationContext(), ImageCropActivity.class);
+        intent.putExtra( "imgUri", imgUri.toString() );
+        startActivity(intent);
     }
 
     private void connectServer(String imgUri){
