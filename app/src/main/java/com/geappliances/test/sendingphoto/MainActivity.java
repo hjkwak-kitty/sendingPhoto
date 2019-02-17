@@ -20,6 +20,7 @@ import android.view.Display;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -39,12 +40,12 @@ public class MainActivity extends AppCompatActivity {
 
     private String TAG = "메인";
 
-    private Button btnSelect;
-    private Button btnCamera;
+    private ImageButton btnSelect;
+    private ImageButton btnCamera;
     private Button btnResizing;
     private ImageView imageView;
-    private EditText editHost;
-    private EditText editPort;
+    public static EditText editHost;
+    public static EditText editPort;
 
     private static final int REQUEST_SELECT_PHOTO = 1;
     private static final int REQUEST_TAKE_PHOTO = 0;
@@ -52,15 +53,10 @@ public class MainActivity extends AppCompatActivity {
     private Uri imgUri, photoURI, albumURI;
     private String currentPhotoPath;
 
-    SimpleSocket ssocket;
-
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-//        Make can do socket transport in main thread
-        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-        StrictMode.setThreadPolicy(policy);
 
 //        Permission Check
         TedPermission.with(this)
@@ -77,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
         editPort.setHint(String.valueOf(Constants.PORT));
 
 //        Button Set
-        btnSelect = (Button) findViewById(R.id.btn_select);
+        btnSelect = (ImageButton) findViewById(R.id.btn_select);
         btnSelect.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -88,7 +84,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
-        btnCamera = (Button) findViewById(R.id.btn_camera);
+        btnCamera = (ImageButton) findViewById(R.id.btn_camera);
         btnCamera.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -96,94 +92,8 @@ public class MainActivity extends AppCompatActivity {
                 takePhoto();
             }
         });
-
-        imageView = (ImageView) findViewById(R.id.image);
-        imageView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (ssocket.isConnected()) {
-                    File imgfile = new File(currentPhotoPath);
-                    ssocket.sendString("size " + imgfile.length() + " .jpg");
-
-                } else {
-                    Toast.makeText(getApplicationContext(), "Socket disconnected", Toast.LENGTH_SHORT).show();
-
-                }
-            }
-        });
-
-        btnResizing = (Button) findViewById(R.id.btn_resizingImage);
-        btnResizing.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.d(TAG, "사진Resizing");
-//                makeBitmap(currentPhotoPath);
-            }
-        });
-
     }
-    
-    private Bitmap resizedImage(String path, int IMAGE_MAX_SIZE) {
-        try {
-//            final int IMAGE_MAX_SIZE = 1200000;
-            //resource = getResources();
 
-            // Decode image size
-            BitmapFactory.Options options = new BitmapFactory.Options();
-            options.inJustDecodeBounds = true;
-            BitmapFactory.decodeFile(path, options);
-
-            int scale = 1;
-            while ((options.outWidth * options.outHeight) * (1 / Math.pow(scale, 2)) >
-                    IMAGE_MAX_SIZE) {
-                scale++;
-            }
-            Log.d("TAG", "scale = " + scale + ", orig-width: " + options.outWidth + ", orig-height: " + options.outHeight);
-
-            Bitmap pic = null;
-            if (scale > 1) {
-                scale--;
-                // scale to max possible inSampleSize that still yields an image
-                // larger than target
-                options = new BitmapFactory.Options();
-                options.inSampleSize = scale;
-                pic = BitmapFactory.decodeFile(path, options);
-
-                // resize to desired dimensions
-
-                Display display = getWindowManager().getDefaultDisplay();
-                Point size = new Point();
-                display.getSize(size);
-                int width = size.y;
-                int height = size.x;
-
-                //int height = imageView.getHeight();
-                //int width = imageView.getWidth();
-                Log.d("TAG", "1th scale operation dimenions - width: " + width + ", height: " + height);
-
-                double y = Math.sqrt(IMAGE_MAX_SIZE
-                        / (((double) width) / height));
-                double x = (y / height) * width;
-
-                Bitmap scaledBitmap = Bitmap.createScaledBitmap(pic, (int) x, (int) y, true);
-                pic.recycle();
-                pic = scaledBitmap;
-
-                System.gc();
-            } else {
-                pic = BitmapFactory.decodeFile(path);
-            }
-
-            Log.d("TAG", "bitmap size - width: " + pic.getWidth() + ", height: " + pic.getHeight());
-            imageView.setImageBitmap(pic);
-            return pic;
-
-        } catch (Exception e) {
-            Log.e("TAG", e.getMessage(), e);
-            return null;
-        }
-
-    }
 
     public void selectAlbum() {
 
@@ -274,8 +184,8 @@ public class MainActivity extends AppCompatActivity {
                         albumFile = writeFile(inStream);
                         Uri providerURI = FileProvider.getUriForFile(this, "com.example.android.fileprovider", albumFile);
                         imgUri = providerURI;
-                        imageView.setImageURI(imgUri);
-                        sendPhoto(albumURI);
+//                        imageView.setImageURI(imgUri);
+                        sendPhoto(imgUri);
                         Log.d("album",albumFile.getAbsolutePath());
                         //cropImage();
 
@@ -301,7 +211,7 @@ public class MainActivity extends AppCompatActivity {
 
                     Log.v("알림", "FROM_CAMERA 처리");
 
-                    imageView.setImageURI(imgUri);
+//                    imageView.setImageURI(imgUri);
                     sendPhoto(imgUri);
 
                 } catch (Exception e) {
@@ -321,8 +231,10 @@ public class MainActivity extends AppCompatActivity {
 
     private void sendPhoto(Uri imgUri) {
    // 이미지 편집
+//        resizedImage( imgUri.toString()  );
+        Log.v( "Uri", currentPhotoPath);
         Intent intent = new Intent(getApplicationContext(), ImageCropActivity.class);
-        intent.putExtra( "imgUri", imgUri.toString() );
+        intent.putExtra( "imgUri", currentPhotoPath);
         startActivity(intent);
     }
 
@@ -354,64 +266,10 @@ public class MainActivity extends AppCompatActivity {
         return file;
     }
 
-    private void connectServer(String imgUri) {
-        Log.v("메인", editPort.getText().toString());
-        String host = Constants.IP;
-        int port = Constants.PORT;
-        if (!editPort.getText().toString().isEmpty()) {
-            port = Integer.parseInt(String.valueOf(editPort.getText()));
-        }
-        if (!editHost.getText().toString().isEmpty()) {
-            host = String.valueOf(editHost.getText());
-        }
-        ssocket = new SimpleSocket(host, port, mHandler, imgUri);
-        ssocket.start();
+    public void getImage(String imageView) {
 
     }
 
-    Handler mHandler = new Handler(Looper.getMainLooper()) {
-        @Override
-        public void handleMessage(Message inputMessage) {
-            switch (inputMessage.what) {
-                case Constants.SIMSOCK_CONNECTED:
-                    String msg = (String) inputMessage.obj;
-                    Toast.makeText(getApplicationContext(), "Socket connected", Toast.LENGTH_SHORT).show();
-                    Log.d("OUT", msg);
-                    // do something with UI
-                    break;
-                case Constants.SIMSOCK_DISCONNECTED:
-                    Log.d("OUT", inputMessage.obj.toString());
-//                    Toast.makeText(getApplicationContext(),"Socket disconnected",Toast.LENGTH_SHORT).show();
-                    // do something with UI
-                    break;
-                case Constants.SIMSOCK_REQIMAGE:
-                    Log.d("OUT", inputMessage.obj.toString());
-//                    if(ssocket.isConnected()){
-                    ssocket.sendFile(currentPhotoPath);
-//                    } else {
-//                        //오류
-//                    }
-                    // do something with UI
-                    break;
-                case Constants.SIMSOCK_DATA:
-                    if (ssocket.isConnected()) {
-                        ssocket.sendString("ok");
-                    }
-                    Toast.makeText(getApplicationContext(), inputMessage.obj.toString(), Toast.LENGTH_SHORT).show();
-                    Log.d("OUT", inputMessage.obj.toString());
-
-                    break;
-                case Constants.SIMSOCK_ERROR:
-                    Toast.makeText(getApplicationContext(), "Error: " + inputMessage.obj.toString(), Toast.LENGTH_SHORT).show();
-                    Log.d("OUT", "error");
-
-                    //오류
-                    break;
-
-
-            }
-        }
-    };
 
     PermissionListener permissionlistener = new PermissionListener() {
         @Override

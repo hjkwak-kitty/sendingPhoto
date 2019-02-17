@@ -11,7 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="40dp"
         android:layout_margin="10dp"
-        android:text="Click Image to send Server"
+        android:text="Select Image to send Server"
         android:textAlignment="center"
         android:textSize="20dp" />
 
@@ -28,15 +28,30 @@
             android:layout_height="match_parent"
             android:layout_weight="1"/>
 
-        <TextView
-            android:id="@+id/textView_original"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="80dp"
-            android:layout_weight="1"
-            android:text="Original Image"
-            android:textAlignment="center"
-            android:textSize="15dp" />
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:layout_margin="10dp"
+            android:layout_weight="4"
+            >
 
+            <TextView
+                android:id="@+id/textView_original_title"
+                android:layout_width="match_parent"
+                android:layout_height="85dp"
+                android:layout_weight="1"
+                android:text="Original Image"
+                android:textAlignment="center"
+                android:textSize="15dp" />
+            <TextView
+                android:id="@+id/textView_original_value"
+                android:layout_width="match_parent"
+                android:layout_height="80dp"
+                android:layout_weight="1"
+                android:textAlignment="center"
+                android:textSize="15dp" />
+        </LinearLayout>
     </LinearLayout>
 
     <LinearLayout
@@ -47,19 +62,35 @@
         android:layout_weight="1"
         >
         <ImageView
-            android:id="@+id/imageView_resized_1G"
+            android:id="@+id/imageView_resized_1M"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1"/>
-
-        <TextView
-            android:id="@+id/textView_resized_1M"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="80dp"
-            android:layout_weight="1"
-            android:text="Resized Image_1G"
-            android:textAlignment="center"
-            android:textSize="15dp" />
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:layout_margin="10dp"
+            android:layout_weight="4"
+            >
+
+            <TextView
+                android:id="@+id/textView_resized_1M_title"
+                android:layout_width="match_parent"
+                android:layout_height="85dp"
+                android:layout_weight="1"
+                android:text="Resized Image"
+                android:textAlignment="center"
+                android:textSize="15dp" />
+            <TextView
+                android:id="@+id/textView_resized_1M_value"
+                android:layout_width="match_parent"
+                android:layout_height="80dp"
+                android:layout_weight="1"
+                android:text="1MB"
+                android:textAlignment="center"
+                android:textSize="15dp" />
+        </LinearLayout>
     </LinearLayout>
 
     <LinearLayout
@@ -75,14 +106,31 @@
             android:layout_height="match_parent"
             android:layout_weight="1"/>
 
-        <TextView
-            android:id="@+id/textView_resized_500K"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="80dp"
-            android:layout_weight="1"
-            android:text="Resized Image_500K"
-            android:textAlignment="center"
-            android:textSize="15dp" />
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:layout_margin="10dp"
+            android:layout_weight="4"
+            >
+
+            <TextView
+                android:id="@+id/textView_resized_500K_title"
+                android:layout_width="match_parent"
+                android:layout_height="85dp"
+                android:layout_weight="1"
+                android:text="Resized Image"
+                android:textAlignment="center"
+                android:textSize="15dp" />
+            <TextView
+                android:id="@+id/textView_resized_500K_value"
+                android:layout_width="match_parent"
+                android:layout_height="80dp"
+                android:layout_weight="1"
+                android:text="500KB"
+                android:textAlignment="center"
+                android:textSize="15dp" />
+        </LinearLayout>
     </LinearLayout>
 
 </LinearLayout>
