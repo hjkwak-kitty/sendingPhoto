@@ -2,21 +2,13 @@ package com.geappliances.test.sendingphoto;
 
 import android.Manifest;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Point;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
-import android.os.StrictMode;
 import android.provider.MediaStore;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.Display;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -232,9 +224,23 @@ public class MainActivity extends AppCompatActivity {
     private void sendPhoto(Uri imgUri) {
    // 이미지 편집
 //        resizedImage( imgUri.toString()  );
+
+        Log.v("메인", MainActivity.editPort.getText().toString());
+        String host = Constants.IP;
+        int port = Constants.PORT;
+        if (!MainActivity.editPort.getText().toString().isEmpty()) {
+            port = Integer.parseInt(String.valueOf(MainActivity.editPort.getText()));
+        }
+        if (!MainActivity.editHost.getText().toString().isEmpty()) {
+            host = String.valueOf(MainActivity.editHost.getText());
+        }
+
         Log.v( "Uri", currentPhotoPath);
         Intent intent = new Intent(getApplicationContext(), ImageCropActivity.class);
+        intent.putExtra("HOST",host);
+        intent.putExtra("PORT",port);
         intent.putExtra( "imgUri", currentPhotoPath);
+
         startActivity(intent);
     }
 

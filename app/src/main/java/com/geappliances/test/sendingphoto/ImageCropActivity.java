@@ -50,6 +50,8 @@ public class ImageCropActivity extends AppCompatActivity {
     TextView textView_small_value;
 
     SimpleSocket ssocket;
+    String host;
+    int port;
 
     protected void onCreate(Bundle savedInstanceState) {
         resizeImage_large = "resizeImage_large";
@@ -62,9 +64,12 @@ public class ImageCropActivity extends AppCompatActivity {
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
 
-//        imageResizing( "path" );
         Intent intent = getIntent();
         imagePath = intent.getStringExtra( "imgUri" );
+         host = intent.getStringExtra("HOST");
+         port = intent.getIntExtra("port",60000);
+        connectServer(host, port);
+
 //        Log.v( "Uri", imagePath );
 //        Uri urivalue = Uri.parse( imagePath );
         imageFile_original = new File(imagePath);
@@ -80,12 +85,11 @@ public class ImageCropActivity extends AppCompatActivity {
 
         imageView_original.setImageBitmap(originalBitmap);
         Log.d("file size", String.valueOf(imageFile_original.length()));
-        connectServer(imagePath);
         imageView_original.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (!ssocket.isConnected()) {
-                    connectServer(imagePath);
+                    connectServer(host,port);
                 }
                 imageFile_large = new File(imagePath);
                 Log.d("file size", String.valueOf(imageFile_original.length()));
@@ -100,12 +104,11 @@ public class ImageCropActivity extends AppCompatActivity {
         Log.d("resizeImage_large_path", String.valueOf(resizeImage_large_path));
         Log.d("1M file size", String.valueOf(imageFile_large.length()));
         imageView_large.setImageBitmap(BitmpaImageSize1M);
-        connectServer(resizeImage_large_path);
         imageView_large.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (!ssocket.isConnected()) {
-                    connectServer(resizeImage_large_path);
+                    connectServer(host,port);
                 }
                 imageFile_large = new File(resizeImage_large_path);
                 
@@ -120,12 +123,11 @@ public class ImageCropActivity extends AppCompatActivity {
         imageFile_small = new File(resizeImage_small_path);
         Log.d("500K file size", String.valueOf(imageFile_small.length()));
         imageView_small.setImageBitmap(BitmpaImageSize500K);
-        connectServer(resizeImage_small_path);
         imageView_small.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (!ssocket.isConnected()) {
-                    connectServer(resizeImage_small_path);
+                    connectServer(host,port);
                 }
                 imageFile_large = new File(resizeImage_small_path);
                 Log.d("file size", String.valueOf(imageFile_small.length()));
@@ -137,18 +139,11 @@ public class ImageCropActivity extends AppCompatActivity {
         textView_small_value.setText( String.valueOf(imageFile_small.length() ));
     }
 
-    private void connectServer(String imgUri) {
-        Log.v("메인", MainActivity.editPort.getText().toString());
-        String host = Constants.IP;
-        int port = Constants.PORT;
-        if (!MainActivity.editPort.getText().toString().isEmpty()) {
-            port = Integer.parseInt(String.valueOf(MainActivity.editPort.getText()));
-        }
-        if (!MainActivity.editHost.getText().toString().isEmpty()) {
-            host = String.valueOf(MainActivity.editHost.getText());
-        }
-        ssocket = new SimpleSocket(host, port, mHandler, imgUri);
+    private void connectServer(String host, int port) {
+        Log.d("socket", "host: " + host +" port" + port);
+        ssocket = new SimpleSocket(host, port, mHandler);
         ssocket.start();
+
     }
 
     Handler mHandler = new Handler( Looper.getMainLooper()) {
