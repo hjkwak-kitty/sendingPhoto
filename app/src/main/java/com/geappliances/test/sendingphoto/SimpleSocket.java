@@ -57,11 +57,10 @@ public class SimpleSocket extends Thread {
         }
     }
 
-    public SimpleSocket(String addr, int port, Handler handler, String imgUri) {
+    public SimpleSocket(String addr, int port, Handler handler) {
         this.addr = addr;
         this.port = port;
         this.handler = handler;
-        this.imgUrl = imgUri;
     }
 
     private void makeMessage(MessageType what, Object obj) {
@@ -72,7 +71,7 @@ public class SimpleSocket extends Thread {
     }
 
     private boolean connect(String addr, int port) {
-        System.out.println("Connecting...");
+        Log.d("socket","Connecting...");
 
         try {
             InetSocketAddress socketAddress = new InetSocketAddress(InetAddress.getByName(addr), port);
@@ -197,7 +196,7 @@ public class SimpleSocket extends Thread {
     }
 
     public void sendString(String str) {
-        Log.d("소켓", "데이터 보냄 " + str);
+        Log.d("소켓", "데이터 보냄 " + str + out);
         out.println(str);
         out.flush();
     }
