@@ -31,8 +31,8 @@ public class SimpleSocket extends Thread {
 
     private BufferedReader buffRecv;
     private BufferedWriter buffSend;
-    DataOutputStream dos;
-    FileInputStream fis;
+    private DataOutputStream dos;
+    private FileInputStream fis;
     private PrintWriter out;
 
 
@@ -98,16 +98,19 @@ public class SimpleSocket extends Thread {
     @Override
     public void run() {
         if (!connect(addr, port)) {
+            makeMessage(MessageType.SIMSOCK_ERROR, "connection error");
             return; // connect failed
         }
-        if (socket == null) return;
+        if (socket == null){
+            makeMessage(MessageType.SIMSOCK_ERROR, "connection error");
+            return;
+        }
 
         Log.d("SimpleSocket", "socket_thread loop started");
 
         String aLine = null;
         while (!Thread.interrupted()) {
             try {
-//                makeMessage(MessageType.SIMSOCK_DATA, "test" + socket.isConnected());
                 if(socket.isInputShutdown() || socket.isOutputShutdown()){
                     disconnected();
                     makeMessage(MessageType.SIMSOCK_DISCONNECTED, "disconnected");
@@ -158,12 +161,10 @@ public class SimpleSocket extends Thread {
             e.printStackTrace();
         } catch (Exception e) {
             e.printStackTrace();
-        } finally {
-
         }
     }
 
-    synchronized public boolean isConnected() {
+    synchronized boolean isConnected() {
         return socket.isConnected();
     }
 
