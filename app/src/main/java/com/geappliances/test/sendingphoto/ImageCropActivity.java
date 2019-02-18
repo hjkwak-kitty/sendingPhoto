@@ -22,6 +22,9 @@ import android.widget.Toast;
 import com.gun0912.tedpermission.TedPermission;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 
 public class ImageCropActivity extends AppCompatActivity {
     int IMAGE_SIZE_1M = 1000000;
@@ -81,8 +84,9 @@ public class ImageCropActivity extends AppCompatActivity {
         });
 
         Bitmap BitmpaImageSize1M = resizedImage(imagePath, IMAGE_SIZE_1M);
+        SaveBitmapToFileCache(BitmpaImageSize1M, imagePath);
+        Log.d("1M file size", String.valueOf(imageFile.length()));
         imageView_resized_1M.setImageBitmap(BitmpaImageSize1M);
-        Log.d("file size", String.valueOf(imageFile.length()));
         connectServer(imagePath);
 
         imageView_resized_1M.setOnClickListener(new View.OnClickListener() {
@@ -96,6 +100,8 @@ public class ImageCropActivity extends AppCompatActivity {
             }
         });
         Bitmap BitmpaImageSize500K = resizedImage(imagePath, IMAGE_SIZE_500K);
+        SaveBitmapToFileCache(BitmpaImageSize500K, imagePath);
+        Log.d("500K file size", String.valueOf(imageFile.length()));
         imageView_resized_500K.setImageBitmap(BitmpaImageSize500K);
         connectServer(imagePath);
         imageView_resized_500K.setOnClickListener(new View.OnClickListener() {
@@ -108,7 +114,10 @@ public class ImageCropActivity extends AppCompatActivity {
                 ssocket.sendString("size " + imageFile.length() + " .jpg");
             }
         });
-        textView_original_value.setText( String.valueOf( imageFile.length() ) + " KB");
+        textView_original_value.setText( String.valueOf( imageFile.length() ));
+        textView_resized_1M_value.setText( String.valueOf( imageFile.length() ));
+        textView_resized_500K_value.setText( String.valueOf( imageFile.length() ));
+
     }
 
     private void connectServer(String imgUri) {
@@ -215,12 +224,36 @@ public class ImageCropActivity extends AppCompatActivity {
                 System.gc();
             } else {
                 pic = BitmapFactory.decodeFile(path);
+
             }
+
             Log.d("TAG", "bitmap size - width: " + pic.getWidth() + ", height: " + pic.getHeight());
             return pic;
         } catch (Exception e) {
             Log.e("TAG", e.getMessage(), e);
             return null;
+        }
+    }
+
+    public static void SaveBitmapToFileCache(Bitmap bitmap, String strFilePath) {
+        File file = new File(strFilePath);
+        if (!file.exists())
+            file.mkdirs();
+        File fileCacheItem = new File(strFilePath);
+        OutputStream out = null;
+        try {
+            fileCacheItem.createNewFile();
+            out = new FileOutputStream(fileCacheItem);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                out.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 }
