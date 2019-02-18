@@ -41,16 +41,16 @@
                 android:layout_width="match_parent"
                 android:layout_height="85dp"
                 android:layout_weight="1"
-                android:text="Original Image"
+                android:text="Original File"
                 android:textAlignment="center"
-                android:textSize="15dp" />
+                android:textSize="10dp" />
             <TextView
                 android:id="@+id/textView_original_value"
                 android:layout_width="match_parent"
                 android:layout_height="80dp"
                 android:layout_weight="1"
                 android:textAlignment="center"
-                android:textSize="15dp" />
+                android:textSize="10dp" />
         </LinearLayout>
     </LinearLayout>
 
@@ -79,17 +79,16 @@
                 android:layout_width="match_parent"
                 android:layout_height="85dp"
                 android:layout_weight="1"
-                android:text="Resized Image"
+                android:text="Resized File"
                 android:textAlignment="center"
-                android:textSize="15dp" />
+                android:textSize="10dp" />
             <TextView
                 android:id="@+id/textView_resized_1M_value"
                 android:layout_width="match_parent"
                 android:layout_height="80dp"
                 android:layout_weight="1"
-                android:text="1MB"
                 android:textAlignment="center"
-                android:textSize="15dp" />
+                android:textSize="10dp" />
         </LinearLayout>
     </LinearLayout>
 
@@ -119,17 +118,16 @@
                 android:layout_width="match_parent"
                 android:layout_height="85dp"
                 android:layout_weight="1"
-                android:text="Resized Image"
+                android:text="Resized File"
                 android:textAlignment="center"
-                android:textSize="15dp" />
+                android:textSize="10dp" />
             <TextView
                 android:id="@+id/textView_resized_500K_value"
                 android:layout_width="match_parent"
                 android:layout_height="80dp"
                 android:layout_weight="1"
-                android:text="500KB"
                 android:textAlignment="center"
-                android:textSize="15dp" />
+                android:textSize="10dp" />
         </LinearLayout>
     </LinearLayout>
 
