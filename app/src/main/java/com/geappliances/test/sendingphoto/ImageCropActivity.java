@@ -87,11 +87,11 @@ public class ImageCropActivity extends AppCompatActivity {
                 if (!ssocket.isConnected()) {
                     connectServer(imagePath);
                 }
+                imageFile_large = new File(imagePath);
                 Log.d("file size", String.valueOf(imageFile_original.length()));
                 ssocket.sendString("size " + imageFile_original.length() + " .jpg");
             }
         });
-
 
         Bitmap BitmpaImageSize1M = resizedImage(imagePath, IMAGE_SIZE_1M);
         SaveBitmapToFileCache(BitmpaImageSize1M, imagePath, resizeImage_large);
@@ -107,11 +107,12 @@ public class ImageCropActivity extends AppCompatActivity {
                 if (!ssocket.isConnected()) {
                     connectServer(resizeImage_large_path);
                 }
+                imageFile_large = new File(resizeImage_large_path);
+                
                 Log.d("file size", String.valueOf(imageFile_large.length()));
                 ssocket.sendString("size " + imageFile_large.length() + " .jpg");
             }
         });
-
 
         Bitmap BitmpaImageSize500K = resizedImage(imagePath, IMAGE_SIZE_500K);
         SaveBitmapToFileCache(BitmpaImageSize500K, imagePath, resizeImage_small);
@@ -126,6 +127,7 @@ public class ImageCropActivity extends AppCompatActivity {
                 if (!ssocket.isConnected()) {
                     connectServer(resizeImage_small_path);
                 }
+                imageFile_large = new File(resizeImage_small_path);
                 Log.d("file size", String.valueOf(imageFile_small.length()));
                 ssocket.sendString("size " + imageFile_small.length() + " .jpg");
             }
