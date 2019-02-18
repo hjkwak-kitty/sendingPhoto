@@ -4,12 +4,14 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
+import com.geappliances.test.sendingphoto.common.Constants;
+import com.geappliances.test.sendingphoto.common.Pref;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
@@ -81,8 +83,8 @@ public class SimpleSocket extends Thread {
             buffSend = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
             out = new PrintWriter(buffSend, true);
             makeMessage(MessageType.SIMSOCK_CONNECTED, "connected");
-            Constants.IP = addr;
-            Constants.PORT = port;
+            Pref.put(Constants.HOST,addr);
+            Pref.put(Constants.PORT,port);
 
 
         } catch (IOException e) {

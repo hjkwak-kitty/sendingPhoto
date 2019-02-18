@@ -1,13 +1,12 @@
 package com.geappliances.test.sendingphoto;
 
-import android.Manifest;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
-import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -20,7 +19,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.gun0912.tedpermission.TedPermission;
+import com.geappliances.test.sendingphoto.common.Constants;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -169,10 +168,14 @@ public class ImageCropActivity extends AppCompatActivity {
                     // do something with UI
                     break;
                 case Constants.SIMSOCK_DATA:
+                    if(inputMessage.obj.toString().equals("ok")){
+                        break;
+                    }
                     if (ssocket.isConnected()) {
                         ssocket.sendString("ok");
                     }
-                    Toast.makeText(getApplicationContext(), inputMessage.obj.toString(), Toast.LENGTH_SHORT).show();
+                    showResult(inputMessage.obj.toString());
+//                    Toast.makeText(getApplicationContext(), inputMessage.obj.toString(), Toast.LENGTH_SHORT).show();
                     Log.d("OUT", inputMessage.obj.toString());
 
                     break;
@@ -268,5 +271,24 @@ public class ImageCropActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
         }
+    }
+
+    private void showResult(String result){
+        AlertDialog.Builder alert_confirm = new AlertDialog.Builder(this);
+        alert_confirm.setMessage(result);
+        alert_confirm.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+                finish();
+            }
+        });
+        // 다이얼로그 생성
+        AlertDialog alert = alert_confirm.create();
+
+        // 아이콘
+        alert.setTitle("Result");
+        alert.show();
+
     }
 }

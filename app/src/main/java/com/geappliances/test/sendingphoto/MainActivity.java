@@ -16,6 +16,8 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.geappliances.test.sendingphoto.common.Constants;
+import com.geappliances.test.sendingphoto.common.Pref;
 import com.gun0912.tedpermission.PermissionListener;
 import com.gun0912.tedpermission.TedPermission;
 
@@ -49,6 +51,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        Pref.initPrefs(this);
+
 
 //        Permission Check
         TedPermission.with(this)
@@ -59,10 +63,10 @@ public class MainActivity extends AppCompatActivity {
 
 
         editHost = (EditText) findViewById(R.id.edit_host);
-        editHost.setHint(Constants.IP);
+        editHost.setHint(Pref.getString(Constants.HOST,"192.168.2.10"));
 
         editPort = (EditText) findViewById(R.id.edit_port);
-        editPort.setHint(String.valueOf(Constants.PORT));
+        editPort.setHint(Integer.toString(Pref.getInt(Constants.PORT,60000)));
 
 //        Button Set
         btnSelect = (ImageButton) findViewById(R.id.btn_select);
@@ -226,8 +230,8 @@ public class MainActivity extends AppCompatActivity {
 //        resizedImage( imgUri.toString()  );
 
         Log.v("메인", MainActivity.editPort.getText().toString());
-        String host = Constants.IP;
-        int port = Constants.PORT;
+        String host = Pref.getString(Constants.HOST,"192.168.2.10");
+        int port = Pref.getInt(Constants.PORT);
         if (!MainActivity.editPort.getText().toString().isEmpty()) {
             port = Integer.parseInt(String.valueOf(MainActivity.editPort.getText()));
         }

@@ -1,4 +1,4 @@
-package com.geappliances.test.sendingphoto;
+package com.geappliances.test.sendingphoto.common;
 
 /**
  * @file Constants.java
@@ -8,8 +8,8 @@ package com.geappliances.test.sendingphoto;
  */
 public class Constants {
 
-    public static String IP = "192.168.1.96";
-    public static int PORT = 60000;
+    public static final String HOST = "HODY";
+    public static final String PORT = "PORT";
 
 
     public static final int SIMSOCK_CONNECTED = 1;
