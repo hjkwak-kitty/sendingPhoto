@@ -27,9 +27,10 @@ public class ImageCropActivity extends AppCompatActivity {
     int IMAGE_SIZE_1M = 1000000;
     int IMAGE_SIZE_500K = 500000;
 
+    File imageFile;
+
     String imagePath;
 
-    ImageView imageView;
     ImageView imageView_original;
     ImageView imageView_resized_1M;
     ImageView imageView_resized_500K;
@@ -49,12 +50,13 @@ public class ImageCropActivity extends AppCompatActivity {
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
 
-
 //        imageResizing( "path" );
         Intent intent = getIntent();
         imagePath = intent.getStringExtra( "imgUri" );
-        Log.v( "Uri", imagePath );
-        Uri urivalue = Uri.parse( imagePath );
+//        Log.v( "Uri", imagePath );
+//        Uri urivalue = Uri.parse( imagePath );
+        imageFile = new File(imagePath);
+        Bitmap originalBitmap = BitmapFactory.decodeFile( imageFile.getAbsolutePath() );
 
         imageView_original = (ImageView) findViewById( R.id.imageView_original );
         imageView_resized_1M = (ImageView) findViewById( R.id.imageView_resized_1M );
@@ -64,36 +66,33 @@ public class ImageCropActivity extends AppCompatActivity {
         textView_resized_1M_value = (TextView) findViewById( R.id.textView_resized_1M_value );
         textView_resized_500K_value = (TextView) findViewById( R.id.textView_resized_500K_value );
 
-        imageView_original.setImageURI(urivalue);
+        imageView_original.setImageBitmap(originalBitmap);
+        Log.d("file size", String.valueOf(imageFile.length()));
         connectServer(imagePath);
         imageView_original.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (ssocket.isConnected()) {
-                    File imgfile = new File(imagePath);
-                    Log.d("file size", String.valueOf(imgfile.length()));
-                    ssocket.sendString("size " + imgfile.length() + " .jpg");
-                } else {
-                    Toast.makeText(getApplicationContext(), "Socket disconnected", Toast.LENGTH_SHORT).show();
+                if (!ssocket.isConnected()) {
+                    connectServer(imagePath);
                 }
+                Log.d("file size", String.valueOf(imageFile.length()));
+                ssocket.sendString("size " + imageFile.length() + " .jpg");
             }
         });
 
         Bitmap BitmpaImageSize1M = resizedImage(imagePath, IMAGE_SIZE_1M);
-//        final int imageSize1M = (BitmpaImageSize1M.getHeight() * BitmpaImageSize1M.getWidth() * 4 / 1024);
         imageView_resized_1M.setImageBitmap(BitmpaImageSize1M);
-//        Log.d("imageSize1G ", String.valueOf(imageSize1M));
+        Log.d("file size", String.valueOf(imageFile.length()));
         connectServer(imagePath);
+
         imageView_resized_1M.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (ssocket.isConnected()) {
-                    File imgfile = new File(imagePath);
-                    Log.d("file size", String.valueOf(imgfile.length()));
-                    ssocket.sendString("size " + imgfile.length() + " .jpg");
-                } else {
-                    Toast.makeText(getApplicationContext(), "Socket disconnected", Toast.LENGTH_SHORT).show();
+                if (!ssocket.isConnected()) {
+                    connectServer(imagePath);
                 }
+                Log.d("file size", String.valueOf(imageFile.length()));
+                ssocket.sendString("size " + imageFile.length() + " .jpg");
             }
         });
         Bitmap BitmpaImageSize500K = resizedImage(imagePath, IMAGE_SIZE_500K);
@@ -102,18 +101,14 @@ public class ImageCropActivity extends AppCompatActivity {
         imageView_resized_500K.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (ssocket.isConnected()) {
-                    File imgfile = new File(imagePath);
-                    Log.d("file size", String.valueOf(imgfile.length()));
-                    ssocket.sendString("size " + imgfile.length() + " .jpg");
-                } else {
-                    Toast.makeText(getApplicationContext(), "Socket disconnected", Toast.LENGTH_SHORT).show();
+                if (!ssocket.isConnected()) {
+                    connectServer(imagePath);
                 }
+                Log.d("file size", String.valueOf(imageFile.length()));
+                ssocket.sendString("size " + imageFile.length() + " .jpg");
             }
         });
-
-        File file = new File(imagePath);
-        textView_original_value.setText( String.valueOf( file.length() ) + " KB");
+        textView_original_value.setText( String.valueOf( imageFile.length() ) + " KB");
     }
 
     private void connectServer(String imgUri) {
@@ -217,12 +212,10 @@ public class ImageCropActivity extends AppCompatActivity {
                 pic.recycle();
                 pic = scaledBitmap;
 
-
                 System.gc();
             } else {
                 pic = BitmapFactory.decodeFile(path);
             }
-
             Log.d("TAG", "bitmap size - width: " + pic.getWidth() + ", height: " + pic.getHeight());
             return pic;
         } catch (Exception e) {
