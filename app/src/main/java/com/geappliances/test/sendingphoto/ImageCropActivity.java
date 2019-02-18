@@ -7,6 +7,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -27,24 +28,32 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 public class ImageCropActivity extends AppCompatActivity {
-    int IMAGE_SIZE_1M = 1000000;
-    int IMAGE_SIZE_500K = 500000;
+    private static String getDirectoryPath;
 
-    File imageFile;
+    int IMAGE_SIZE_1M = 2000000;
+    int IMAGE_SIZE_500K = 1000000;
+
+    File imageFile_original;
+    File imageFile_large;
+    File imageFile_small;
 
     String imagePath;
+    String resizeImage_large;
+    String resizeImage_small;
 
     ImageView imageView_original;
-    ImageView imageView_resized_1M;
-    ImageView imageView_resized_500K;
+    ImageView imageView_large;
+    ImageView imageView_small;
 
     TextView textView_original_value;
-    TextView textView_resized_1M_value;
-    TextView textView_resized_500K_value;
+    TextView textView_large_value;
+    TextView textView_small_value;
 
     SimpleSocket ssocket;
 
     protected void onCreate(Bundle savedInstanceState) {
+        resizeImage_large = "resizeImage_large";
+        resizeImage_small = "resizeImage_small";
 
         super.onCreate( savedInstanceState );
         setContentView( R.layout.activity_image_crop );
@@ -58,19 +67,19 @@ public class ImageCropActivity extends AppCompatActivity {
         imagePath = intent.getStringExtra( "imgUri" );
 //        Log.v( "Uri", imagePath );
 //        Uri urivalue = Uri.parse( imagePath );
-        imageFile = new File(imagePath);
-        Bitmap originalBitmap = BitmapFactory.decodeFile( imageFile.getAbsolutePath() );
+        imageFile_original = new File(imagePath);
+        Bitmap originalBitmap = BitmapFactory.decodeFile( imageFile_original.getAbsolutePath() );
 
         imageView_original = (ImageView) findViewById( R.id.imageView_original );
-        imageView_resized_1M = (ImageView) findViewById( R.id.imageView_resized_1M );
-        imageView_resized_500K = (ImageView) findViewById( R.id.imageView_resized_500K );
+        imageView_large = (ImageView) findViewById( R.id.imageView_resized_1M );
+        imageView_small = (ImageView) findViewById( R.id.imageView_resized_500K );
 
         textView_original_value = (TextView) findViewById( R.id.textView_original_value );
-        textView_resized_1M_value = (TextView) findViewById( R.id.textView_resized_1M_value );
-        textView_resized_500K_value = (TextView) findViewById( R.id.textView_resized_500K_value );
+        textView_large_value = (TextView) findViewById( R.id.textView_resized_1M_value );
+        textView_small_value = (TextView) findViewById( R.id.textView_resized_500K_value );
 
         imageView_original.setImageBitmap(originalBitmap);
-        Log.d("file size", String.valueOf(imageFile.length()));
+        Log.d("file size", String.valueOf(imageFile_original.length()));
         connectServer(imagePath);
         imageView_original.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -78,46 +87,52 @@ public class ImageCropActivity extends AppCompatActivity {
                 if (!ssocket.isConnected()) {
                     connectServer(imagePath);
                 }
-                Log.d("file size", String.valueOf(imageFile.length()));
-                ssocket.sendString("size " + imageFile.length() + " .jpg");
+                Log.d("file size", String.valueOf(imageFile_original.length()));
+                ssocket.sendString("size " + imageFile_original.length() + " .jpg");
             }
         });
+
 
         Bitmap BitmpaImageSize1M = resizedImage(imagePath, IMAGE_SIZE_1M);
-        SaveBitmapToFileCache(BitmpaImageSize1M, imagePath);
-        Log.d("1M file size", String.valueOf(imageFile.length()));
-        imageView_resized_1M.setImageBitmap(BitmpaImageSize1M);
-        connectServer(imagePath);
-
-        imageView_resized_1M.setOnClickListener(new View.OnClickListener() {
+        SaveBitmapToFileCache(BitmpaImageSize1M, imagePath, resizeImage_large);
+        final String resizeImage_large_path = getDirectoryPath + "/" + resizeImage_large + ".jpg";
+        imageFile_large = new File(resizeImage_large_path);
+        Log.d("resizeImage_large_path", String.valueOf(resizeImage_large_path));
+        Log.d("1M file size", String.valueOf(imageFile_large.length()));
+        imageView_large.setImageBitmap(BitmpaImageSize1M);
+        connectServer(resizeImage_large_path);
+        imageView_large.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (!ssocket.isConnected()) {
-                    connectServer(imagePath);
+                    connectServer(resizeImage_large_path);
                 }
-                Log.d("file size", String.valueOf(imageFile.length()));
-                ssocket.sendString("size " + imageFile.length() + " .jpg");
+                Log.d("file size", String.valueOf(imageFile_large.length()));
+                ssocket.sendString("size " + imageFile_large.length() + " .jpg");
             }
         });
+
+
         Bitmap BitmpaImageSize500K = resizedImage(imagePath, IMAGE_SIZE_500K);
-        SaveBitmapToFileCache(BitmpaImageSize500K, imagePath);
-        Log.d("500K file size", String.valueOf(imageFile.length()));
-        imageView_resized_500K.setImageBitmap(BitmpaImageSize500K);
-        connectServer(imagePath);
-        imageView_resized_500K.setOnClickListener(new View.OnClickListener() {
+        SaveBitmapToFileCache(BitmpaImageSize500K, imagePath, resizeImage_small);
+        final String resizeImage_small_path = getDirectoryPath + "/" + resizeImage_small + ".jpg";
+        imageFile_small = new File(resizeImage_small_path);
+        Log.d("500K file size", String.valueOf(imageFile_small.length()));
+        imageView_small.setImageBitmap(BitmpaImageSize500K);
+        connectServer(resizeImage_small_path);
+        imageView_small.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (!ssocket.isConnected()) {
-                    connectServer(imagePath);
+                    connectServer(resizeImage_small_path);
                 }
-                Log.d("file size", String.valueOf(imageFile.length()));
-                ssocket.sendString("size " + imageFile.length() + " .jpg");
+                Log.d("file size", String.valueOf(imageFile_small.length()));
+                ssocket.sendString("size " + imageFile_small.length() + " .jpg");
             }
         });
-        textView_original_value.setText( String.valueOf( imageFile.length() ));
-        textView_resized_1M_value.setText( String.valueOf( imageFile.length() ));
-        textView_resized_500K_value.setText( String.valueOf( imageFile.length() ));
-
+        textView_original_value.setText( String.valueOf( imageFile_original.length() ));
+        textView_large_value.setText( String.valueOf( imageFile_large.length() ));
+        textView_small_value.setText( String.valueOf(imageFile_small.length() ));
     }
 
     private void connectServer(String imgUri) {
@@ -235,11 +250,14 @@ public class ImageCropActivity extends AppCompatActivity {
         }
     }
 
-    public static void SaveBitmapToFileCache(Bitmap bitmap, String strFilePath) {
+    public static void SaveBitmapToFileCache(Bitmap bitmap, String strFilePath, String name) {
         File file = new File(strFilePath);
         if (!file.exists())
             file.mkdirs();
-        File fileCacheItem = new File(strFilePath);
+        File oldPath = new File(strFilePath);
+        getDirectoryPath = oldPath.getParent();
+
+        File fileCacheItem = new File(getDirectoryPath + "/" + name + ".jpg");
         OutputStream out = null;
         try {
             fileCacheItem.createNewFile();
