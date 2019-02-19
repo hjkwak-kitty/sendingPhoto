@@ -63,8 +63,6 @@ public class ImageCropActivity extends AppCompatActivity {
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
 
-
-
 //        get Intent data and connect socket
         Intent intent = getIntent();
         imagePath = intent.getStringExtra( "imgUri" );
@@ -112,7 +110,6 @@ public class ImageCropActivity extends AppCompatActivity {
                 if (!ssocket.isConnected()) {
                     connectServer(host,port);
                 }
-
                 imagePath = resizeImage_large_path;
                 Log.d("file size", String.valueOf(imageFile_large.length()));
                 ssocket.sendString("size " + imageFile_large.length() + " .jpg");
@@ -145,7 +142,6 @@ public class ImageCropActivity extends AppCompatActivity {
         Log.d("socket", "host: " + host +" port" + port);
         ssocket = new SimpleSocket(host, port, mHandler);
         ssocket.start();
-
     }
 
     Handler mHandler = new Handler( Looper.getMainLooper()) {
