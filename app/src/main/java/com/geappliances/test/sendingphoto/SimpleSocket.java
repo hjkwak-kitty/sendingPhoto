@@ -41,7 +41,6 @@ public class SimpleSocket extends Thread {
     private String addr;
     private int port;
     private Handler handler = null;
-    private String imgUrl;
 
 
     public enum MessageType {
@@ -137,7 +136,6 @@ public class SimpleSocket extends Thread {
                 }
             } catch (IOException e) {
                 makeMessage(MessageType.SIMSOCK_ERROR, "error " + e.getMessage());
-//                disconnected();
                 // TODO Auto-generated catch block
                 e.printStackTrace();
                 break;
@@ -158,9 +156,11 @@ public class SimpleSocket extends Thread {
             dos.close();
             socket.close();
         } catch (IOException e) {
+            makeMessage(MessageType.SIMSOCK_ERROR, "error " + e.getMessage());
             // TODO Auto-generated catch block
             e.printStackTrace();
         } catch (Exception e) {
+            makeMessage(MessageType.SIMSOCK_ERROR, "error " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -189,15 +189,21 @@ public class SimpleSocket extends Thread {
             Log.d("소켓", "데이터 보냄 완료" + myFile.exists() + socket.isConnected());
 
         } catch (UnknownHostException e) {
+            makeMessage(MessageType.SIMSOCK_ERROR, "error " + e.getMessage());
             // TODO Auto-generated catch block
             e.printStackTrace();
         } catch (IOException e) {
+            makeMessage(MessageType.SIMSOCK_ERROR, "error " + e.getMessage());
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }
 
     public void sendString(String str) {
+        if (out == null){
+            makeMessage(MessageType.SIMSOCK_ERROR, "error ");
+            return;
+        }
         Log.d("소켓", "데이터 보냄 " + str + out);
         out.println(str);
         out.flush();
