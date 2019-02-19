@@ -36,8 +36,6 @@ public class MainActivity extends AppCompatActivity {
 
     private ImageButton btnSelect;
     private ImageButton btnCamera;
-    private Button btnResizing;
-    private ImageView imageView;
     public static EditText editHost;
     public static EditText editPort;
 
@@ -130,6 +128,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
         } else {
+            Toast.makeText(this,"Please, retry",Toast.LENGTH_LONG).show();
 
             return;
 
